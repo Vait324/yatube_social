@@ -1,0 +1,26 @@
+<div class="card">
+    <div class="card-body">
+            <div class="h2">
+               
+                <p>{{ author.get_full_name }}</p>
+            </div>
+            <div class="h3 text-muted">
+                
+                 <p>{{ author.username }}</p>
+            </div>
+    </div>
+    <ul class="list-group list-group-flush">
+            <li class="list-group-item">
+                    <div class="h6 text-muted">
+                    Подписчиков: XXX <br />
+                    Подписан: XXX
+                    </div>
+            </li>
+            <li class="list-group-item">
+                    <div class="h6 text-muted">
+                        
+                        <p>Записей: {{ post_count }}</p>
+                    </div>
+            </li>
+    </ul>
+</div>
