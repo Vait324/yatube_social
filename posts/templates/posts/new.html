@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block title %}
-{% if is_edit == True %}
+{% if is_edit %}
 Редактирование записи
 {% else %}
 Новая запись
@@ -12,7 +12,7 @@
 <div class="row justify-content-center">
     <div class="col-md-8 p-5">
         <div class="card">
-            {% if is_edit == True %}
+            {% if is_edit %}
             <div class="card-header">Редактирование записи</div>
             <div class="card-body">
                 {% else %}
@@ -45,7 +45,7 @@
 
                     <div class="col-md-6 offset-md-4">              
                             <button type="submit" class="btn btn-primary">
-                                {% if is_edit == True %}
+                                {% if is_edit %}
                                 Редактировать
                                 {% else %}
                                 Новая запись

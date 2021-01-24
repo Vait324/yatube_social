@@ -143,15 +143,3 @@ class PostsURLTests(TestCase):
         response = self.guest_client.get(original_url, follow=True)
         self.assertRedirects(response,  reverse('login') + '?next=' +
                              original_url)
-
-    def test_subscribe_to_author(self):
-        """Проверка возможности подписаться на автора"""
-        # Напишу тест после ревью. К сожалению, пока не успеваю
-
-    def test_unsubscrube_from_author(self):
-        """Проверка возможности отписаться от автора"""
-        # Напишу тест после ревью. К сожалению, пока не успеваю
-
-    def test_new_post_in_required_follow_page(self):
-        """Новый пост отображается на странице соответствующего подписчика"""
-        # Напишу тест после ревью. К сожалению, пока не успеваю

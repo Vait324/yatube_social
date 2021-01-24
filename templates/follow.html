@@ -4,17 +4,18 @@
 {% block content %}
     <div class="container">
            <h1> Личная лента постов </h1>
+           {% include 'includes/menu.html' %}
             {% load cache %}
-                {% cache 20 index_page %}         
+                {% cache 20 following_page page request.user.username %}         
                     {% for post in page %}
                         {% include "includes/post_item.html" with post=post %}
                     {% endfor %}
-                {% endcache %}
+                
     </div>
 
-        <!-- Вывод паджинатора -->
-        {% if page.has_other_pages %}
+      
+            
             {% include "includes/paginator.html" with items=page paginator=paginator%}
-        {% endif %}
+            {% endcache %}
 
 {% endblock %} 

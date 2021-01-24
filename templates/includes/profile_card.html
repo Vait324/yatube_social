@@ -12,8 +12,8 @@
     <ul class="list-group list-group-flush">
             <li class="list-group-item">
                     <div class="h6 text-muted">
-                    Подписчиков: XXX <br />
-                    Подписан: XXX
+                    Подписчиков: {{ followers_count }} <br />
+                    Подписан: {{ following_count }}
                     </div>
             </li>
             <li class="list-group-item">
@@ -22,5 +22,6 @@
                         <p>Записей: {{ post_count }}</p>
                     </div>
             </li>
+            {% include 'includes/subscribe.html' %}
     </ul>
 </div>

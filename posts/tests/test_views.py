@@ -6,7 +6,7 @@ import tempfile
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 
-from ..models import Group, Post, User
+from ..models import Group, Post, User, Follow
 
 
 class PostPagesTest(TestCase):
@@ -15,6 +15,8 @@ class PostPagesTest(TestCase):
         super().setUpClass()
         settings.MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
         cls.user2 = User.objects.create(username='Andrey')
+        cls.user3 = User.objects.create(username='Pavel')
+        cls.user4 = User.objects.create(username='Ivan')
         cls.group = Group.objects.create(
             id=1,
             title='Тестовая группа',
@@ -48,6 +50,10 @@ class PostPagesTest(TestCase):
             author=PostPagesTest.user2,
             group=PostPagesTest.group,
             image=uploaded
+        )
+        cls.follow = Follow.objects.create(
+            user=PostPagesTest.user2,
+            author=PostPagesTest.user4
         )
 
     @classmethod
@@ -126,7 +132,6 @@ class PostPagesTest(TestCase):
         response = self.authorized_client.get(
             reverse('profile', kwargs={'username': PostPagesTest.user2})
         )
-        self.assertEqual(response.context['post_count'], 1)
         self.assertEqual(response.context.get('author').username,
                          str(PostPagesTest.user2))
         self.post_text_and_image_check(response.context.get('user_posts'),
@@ -169,46 +174,52 @@ class PostPagesTest(TestCase):
         self.assertEqual(response.context.get('is_edit'), True)
 
     def test_index_cache(self):
-        """ Проеврка кэширования главной страницы """
-        n1_request = self.guest_client.get('/')
+        """ Проверка кэширования главной страницы """
+        n1_request = self.guest_client.get(reverse('index'))
         Post.objects.create(id=35, text='Тестовый текст',
                             pub_date='2021-01-02',
                             author=PostPagesTest.user2,)
-        n2_request = self.guest_client.get('/')
-        self.assertHTMLEqual(str(n1_request.content), str(n2_request.content),
-                             msg=None)
-
-
-class PaginatorViewsTest(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        cls.user = User.objects.create(username='testuser')
-        cls.group = Group.objects.create(
-                title='Тестовый заголовок',
-                slug='test_slug',
-        )
+        n2_request = self.guest_client.get(reverse('index'))
         posts = []
         for i in range(1, 14):
             posts.append(Post(
                 text='text' + str(i),
-                author=cls.user,
-                group=cls.group
+                author=PostPagesTest.user2,
+                group=PostPagesTest.group
             ))
         Post.objects.bulk_create(posts)
+        n3_request = self.guest_client.get(reverse('index') + '?page=2')
+        self.assertHTMLEqual(str(n1_request.content),
+                             str(n2_request.content), msg=None)
+        self.assertHTMLNotEqual(str(n1_request.content),
+                                str(n3_request.content), msg=None)
 
-    def setUp(self):
-        self.guest_client = Client()
-        self.user = User.objects.create(username='User')
-        self.authorized_client = Client()
-        self.authorized_client.force_login(self.user)
+    def test_subscribe_to_author(self):
+        """Проверка возможности подписаться на автора"""
+        follow_count = Follow.objects.count()
+        self.authorized_client.get(
+            reverse('profile_follow', kwargs={
+                'username': PostPagesTest.user3.username,
+            }))
+        self.assertEqual(Follow.objects.count(), follow_count+1)
 
-    def test_first_page_containse_ten_records(self):
-        """Первая страница содержит 10 записей из 13"""
-        response = self.authorized_client.get(reverse('index'))
-        self.assertEqual(len(response.context.get('page').object_list), 10)
+    def test_unsubscrube_from_author(self):
+        """Проверка возможности отписаться от автора"""
+        follow_count = Follow.objects.count()
+        self.authorized_client.get(
+            reverse('profile_unfollow', kwargs={
+                'username': PostPagesTest.user4
+            }))
+        self.assertEqual(Follow.objects.count(), follow_count-1)
 
-    def test_second_page_containse_three_records(self):
-        """Вторая стрница содержит 3 записи из 13"""
-        response = self.authorized_client.get(reverse('index') + '?page=2')
-        self.assertEqual(len(response.context.get('page').object_list), 3)
+    def test_new_post_in_required_follow_page(self):
+        """Новый пост отображается на странице подписчика"""
+        post_for_sub = Post.objects.create(
+            id=44,
+            text='For my subs',
+            pub_date='2021-01-02',
+            author=PostPagesTest.user4
+        )
+        response = self.authorized_client.get(reverse('follow_index'))
+        self.assertEqual(response.context.get('post').text,
+                         post_for_sub.text)

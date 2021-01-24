@@ -45,21 +45,28 @@ def new_post(request):
 def profile(request, username):
     user = get_object_or_404(User, username=username)
     user_posts = Post.objects.filter(author__username=username)
-    post_count = user_posts.count()
-    if post_count == 0:
-        main_post = ''
-    else:
-        main_post = user_posts[0]
+    # post_count = user_posts.count()
+    # if post_count == 0:
+    #     main_post = ''
+    # else:
+    #     main_post = user_posts[0]
+    followers_count = Follow.objects.filter(author__username=user).count()
+    following_count = Follow.objects.filter(user__username=user).count()
+    following = Follow.objects.filter(user__username=request.user.username,
+                                      author__username=user).exists()
     paginator = Paginator(user_posts, 10)
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
     return render(request, 'profile.html', {
         'author': user,
         'user_posts': user_posts,
-        'post_count': post_count,
+        # 'post_count': post_count,
         'page': page,
         'paginator': paginator,
-        'main_post': main_post
+        # 'main_post': main_post,
+        'followers_count': followers_count,
+        'following_count': following_count,
+        'following': following
     })
 
 
@@ -69,12 +76,19 @@ def post_view(request, username, post_id):
     post_count = Post.objects.filter(author__username=username).count()
     comments = post.comments.all()
     form = CommentForm(request.POST or None)
+    followers_count = Follow.objects.filter(author__username=user).count()
+    following_count = Follow.objects.filter(user__username=user).count()
+    following = Follow.objects.filter(user__username=request.user.username,
+                                      author__username=user).exists()
     return render(request, 'post.html', {
         'author': user,
         'post': post,
         'post_count': post_count,
         'comments': comments,
-        'form': form
+        'form': form,
+        'followers_count': followers_count,
+        'following_count': following_count,
+        'following': following
     })
 
 
@@ -141,10 +155,8 @@ def profile_follow(request, username):
 
 @login_required
 def profile_unfollow(request, username):
-    follow = get_object_or_404(Follow, user=request.user,
-                               author__username=username)
-    if follow:
-        follow.delete()
+    Follow.objects.filter(user=request.user,
+                          author__username=username).delete()
     return redirect('profile', username=username)
 
 

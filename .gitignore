@@ -7,6 +7,7 @@ venv/
 __pycache__/
 *.py[cod]
 
+
 .idea
 .DS_Store
 .AppleDouble
@@ -19,4 +20,10 @@ static/
 posts/static/
 media/
 
+
+.vscode
+sent_emails
+
+
 db.sqlite3
+
