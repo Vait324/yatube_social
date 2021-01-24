@@ -45,11 +45,6 @@ def new_post(request):
 def profile(request, username):
     user = get_object_or_404(User, username=username)
     user_posts = Post.objects.filter(author__username=username)
-    # post_count = user_posts.count()
-    # if post_count == 0:
-    #     main_post = ''
-    # else:
-    #     main_post = user_posts[0]
     followers_count = Follow.objects.filter(author__username=user).count()
     following_count = Follow.objects.filter(user__username=user).count()
     following = Follow.objects.filter(user__username=request.user.username,
@@ -60,10 +55,8 @@ def profile(request, username):
     return render(request, 'profile.html', {
         'author': user,
         'user_posts': user_posts,
-        # 'post_count': post_count,
         'page': page,
         'paginator': paginator,
-        # 'main_post': main_post,
         'followers_count': followers_count,
         'following_count': following_count,
         'following': following
