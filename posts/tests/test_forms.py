@@ -1,9 +1,10 @@
-from django.test import Client, TestCase, override_settings
-from django.urls import reverse
 import shutil
 import tempfile
+
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import Client, TestCase, override_settings
+from django.urls import reverse
 
 from ..models import Comment, Group, Post, User
 
@@ -78,7 +79,7 @@ class PostFormTest(TestCase):
             'username': PostFormTest.post.author,
             'post_id': PostFormTest.post.id
         }))
-        self.assertEqual(Post.objects.get(id=1).text, 'Измененный текст поста')
+        self.assertEqual(Post.objects.get(id=1).text, form_data['text'])
 
 
 class CommentFormTest(TestCase):

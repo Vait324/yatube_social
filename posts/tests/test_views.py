@@ -1,12 +1,13 @@
-from django import forms
-from django.test import Client, TestCase
-from django.urls import reverse
 import shutil
 import tempfile
+
+from django import forms
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import Client, TestCase
+from django.urls import reverse
 
-from ..models import Group, Post, User, Follow
+from ..models import Follow, Group, Post, User
 
 
 class PostPagesTest(TestCase):
@@ -121,7 +122,7 @@ class PostPagesTest(TestCase):
         """Посту присваевается требуемое сообщество"""
         post_in_group1 = Post.objects.filter(
             group__title=PostPagesTest.group.title
-            )
+        )
         response = self.authorized_client.get(
             reverse('group', kwargs={'slug': PostPagesTest.group.slug})
         )

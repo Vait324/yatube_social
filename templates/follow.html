@@ -6,16 +6,11 @@
            <h1> Личная лента постов </h1>
            {% include 'includes/menu.html' %}
             {% load cache %}
-                {% cache 20 following_page page request.user.username %}         
+                {% cache 20 following_page page.number request.user.username %}         
                     {% for post in page %}
                         {% include "includes/post_item.html" with post=post %}
                     {% endfor %}
-                
-    </div>
-
-      
-            
             {% include "includes/paginator.html" with items=page paginator=paginator%}
             {% endcache %}
-
+        </div>
 {% endblock %} 
